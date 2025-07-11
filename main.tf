@@ -63,7 +63,15 @@ resource "aws_ec2_instance_state" "main" {
 
 resource "terraform_data" "main_deregister_old_ami" {
   provisioner "local-exec" {
-    command = "powershell -Command \"$ami = aws ec2 describe-images --owners self --filters Name=name,Values=roboshop-dev-${var.component} --query 'Images[0].ImageId' --output text; if ($ami -ne 'None') { Write-Host 'Deregistering AMI:' $ami; aws ec2 deregister-image --image-id $ami } else { Write-Host 'No AMI found to deregister.' }\""
+    command = <<EOT
+ami=$(aws ec2 describe-images --owners self --filters Name=name,Values=roboshop-dev-shipping --query 'Images[0].ImageId' --output text)
+if [ "$ami" != "None" ]; then
+  echo "Deregistering AMI: $ami"
+  aws ec2 deregister-image --image-id $ami
+else
+  echo "No AMI found to deregister."
+fi
+EOT
   }
 
   triggers_replace = [timestamp()]
