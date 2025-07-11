@@ -61,24 +61,6 @@ resource "aws_ec2_instance_state" "main" {
   depends_on = [ terraform_data.main ]
 }
 
-resource "terraform_data" "main_deregister_old_ami" {
-  provisioner "local-exec" {
-    command = <<EOT
-ami=$(aws ec2 describe-images --owners self --filters Name=name,Values=roboshop-dev-shipping --query 'Images[0].ImageId' --output text)
-if [ "$ami" != "None" ]; then
-  echo "Deregistering AMI: $ami"
-  aws ec2 deregister-image --image-id $ami
-else
-  echo "No AMI found to deregister."
-fi
-EOT
-  }
-
-  triggers_replace = [timestamp()]
-}
-
-
-
 resource "aws_ami_from_instance" "main" {
   name               = "${var.project}-${var.environment}-${var.component}"
   source_instance_id = aws_instance.main.id
