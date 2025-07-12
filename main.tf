@@ -100,6 +100,8 @@ resource "aws_launch_template" "main" {
 
   vpc_security_group_ids = [local.sg_id]
 
+  update_default_version = true # each time you update, new version will become default
+
   tag_specifications {
     resource_type = "instance"
 
